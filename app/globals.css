@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #faf9fd;
+  --foreground: #111827;
+}
+
+.dark {
+  --background: #070a12;
+  --foreground: #f9fafb;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Adaptive Logo styling for Concept 03 (The Prompt Nexus) */
+.logo-tile {
+  fill: #ffffff;
+  stroke: #e2e8f0;
+  stroke-width: 4;
+  transition: fill 0.25s ease, stroke 0.25s ease;
+}
+.dark .logo-tile {
+  fill: #0b0f19;
+  stroke: #1e293b;
+  stroke-width: 4;
+}
+
+.logo-echo {
+  stroke: #A78BFA;
+  transition: stroke 0.25s ease;
+}
+.dark .logo-echo {
+  stroke: #C4B5FD;
+}
