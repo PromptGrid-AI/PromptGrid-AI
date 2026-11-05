@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { Analytics } from '@vercel/analytics/next';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://promptgridai.com';
 
@@ -71,6 +72,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
