@@ -237,13 +237,13 @@ export default function PrivacyPolicyPage() {
 
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300 pl-4 list-disc">
               <li>
-                <strong className="text-gray-800 dark:text-gray-200">Supabase (PostgreSQL Database):</strong> Securely stores published articles, prompt catalogs, and author bios with row-level security (RLS).
+                <strong className="text-gray-800 dark:text-gray-200">Cloud Hosting & Content Delivery Networks:</strong> Powers fast, reliable, and secure access to our website worldwide through encrypted HTTPS connections.
               </li>
               <li>
-                <strong className="text-gray-800 dark:text-gray-200">Vercel & Edge CDN:</strong> Powers zero-latency global page delivery and static asset caching.
+                <strong className="text-gray-800 dark:text-gray-200">Secure Database & Storage Services:</strong> Protects and delivers published editorial content, guide catalogs, and site assets using enterprise-grade encryption.
               </li>
               <li>
-                <strong className="text-gray-800 dark:text-gray-200">n8n Automation Pipelines:</strong> Orchestrates programmatic research feeds and editorial workflows in an isolated, secure environment.
+                <strong className="text-gray-800 dark:text-gray-200">Analytics & Performance Diagnostics:</strong> Aggregates privacy-friendly, anonymized traffic insights to maintain optimal site uptime and user experience.
               </li>
             </ul>
           </section>
