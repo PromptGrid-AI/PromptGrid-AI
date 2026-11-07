@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
+import SmartImage from '@/components/SmartImage';
 import Link from 'next/link';
 import { Post } from '@/lib/mock-data';
 
@@ -11,7 +11,7 @@ export default function BlogCard({ post }: { post: Post }) {
       
       {/* Featured Thumbnail */}
       <Link href={`/${post.category}/${post.slug}`} className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-purple-50 dark:bg-gray-800 block">
-        <Image
+        <SmartImage
           src={post.featured_image}
           alt={post.title}
           fill

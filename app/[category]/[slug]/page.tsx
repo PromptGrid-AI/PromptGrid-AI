@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import SmartImage from '@/components/SmartImage';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -179,7 +180,7 @@ export default async function ArticlePage({ params }: PageProps) {
 
           {/* Large Widescreen Featured Image */}
           <div className="relative aspect-[16/7] sm:aspect-[21/9] w-full rounded-2xl overflow-hidden shadow-sm bg-purple-50">
-            <Image
+            <SmartImage
               src={post.featured_image}
               alt={post.title}
               fill

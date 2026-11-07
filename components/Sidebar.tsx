@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getPublishedPosts } from '@/lib/supabase';
 import SidebarSearchBox from './SidebarSearchBox';
 import { InstagramIcon, FacebookIcon, YoutubeIcon } from '@/components/SocialIcons';
+import SmartImage from '@/components/SmartImage';
 
 export default async function Sidebar() {
   const allPosts = await getPublishedPosts();
@@ -79,10 +80,11 @@ export default async function Sidebar() {
               className="group flex items-center gap-3"
             >
               <div className="relative w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-purple-50 dark:bg-gray-800">
-                <Image
+                <SmartImage
                   src={post.featured_image}
                   alt={post.title}
                   fill
+                  sizes="48px"
                   className="object-cover group-hover:scale-105 transition-transform"
                 />
               </div>
