@@ -67,6 +67,7 @@ export const metadata: Metadata = {
 };
 
 import { ThemeProvider } from '@/components/ThemeProvider';
+import ScrollToTop from '@/components/ScrollToTop';
 
 export default function RootLayout({
   children,
@@ -74,8 +75,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen flex flex-col bg-[#FAF9FD] dark:bg-[#070A12] text-gray-900 dark:text-gray-100 antialiased selection:bg-purple-100 selection:text-purple-900 dark:selection:bg-purple-900/50 dark:selection:text-purple-200">
+        <ScrollToTop />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Navbar />
           <main className="flex-1">
