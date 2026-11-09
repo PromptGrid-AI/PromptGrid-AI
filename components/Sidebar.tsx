@@ -27,6 +27,7 @@ export default async function Sidebar() {
             src="/images/author-avatar-v2.jpg"
             alt="Author bio"
             fill
+            sizes="64px"
             className="object-cover"
           />
         </div>

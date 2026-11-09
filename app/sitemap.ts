@@ -30,6 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: new Date(post.created_at || new Date()),
     changeFrequency: 'weekly',
     priority: 0.9,
+    images: post.featured_image ? [post.featured_image] : undefined,
   }));
 
   return [...staticPages, ...categoryPages, ...postPages];

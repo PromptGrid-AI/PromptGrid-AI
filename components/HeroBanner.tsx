@@ -25,12 +25,12 @@ export default function HeroBanner() {
           
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
             
-            {/* Left Column: 3D Character (Exact image from design) */}
+            {/* Left Column: AI Prompt Engineer Character */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-72 h-72 sm:w-80 sm:h-80 lg:w-[350px] lg:h-[350px] rounded-2xl overflow-hidden">
+              <div className="relative w-72 h-72 sm:w-80 sm:h-80 lg:w-[350px] lg:h-[350px] rounded-2xl overflow-hidden shadow-xl ring-1 ring-purple-500/20">
                 <Image
-                  src="/images/vexon-hero-character.jpg"
-                  alt="3D AI Creator"
+                  src="/images/hero-option-2.jpg"
+                  alt="AI Prompt Architect"
                   fill
                   className="object-cover object-center"
                   priority

@@ -161,6 +161,7 @@ export default async function ArticlePage({ params }: PageProps) {
                     src={post.author.avatar}
                     alt={post.author.name}
                     fill
+                    sizes="28px"
                     className="object-cover"
                   />
                 </div>
@@ -184,8 +185,9 @@ export default async function ArticlePage({ params }: PageProps) {
               src={post.featured_image}
               alt={post.title}
               fill
-              sizes="100vw"
+              sizes="(max-width: 1280px) 100vw, 1200px"
               priority
+              loading="eager"
               className="object-cover"
             />
           </div>
