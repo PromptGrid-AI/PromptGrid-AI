@@ -310,6 +310,8 @@ export async function getPostsByCategory(category: string): Promise<Post[]> {
   }
 }
 
+const INTERNAL_TAGS = new Set(['posted_to_social']);
+
 function normalizeFaqs(raw: unknown): FaqItem[] {
   if (!Array.isArray(raw)) return [];
   return raw.filter(
@@ -354,7 +356,11 @@ function mapDbPostToPost(row: DatabasePost): Post {
     updated_at_iso: row.updated_at || row.created_at,
     reading_time: `${row.reading_time_minutes || 4} min read`,
     cluster_slug: row.cluster_slug || undefined,
-    tags: Array.isArray(row.tags) ? row.tags.filter((t) => typeof t === 'string' && t.trim().length > 0) : [],
+    tags: Array.isArray(row.tags)
+      ? row.tags.filter(
+          (t) => typeof t === 'string' && t.trim().length > 0 && !INTERNAL_TAGS.has(t.trim().toLowerCase())
+        )
+      : [],
     faqs: normalizeFaqs(row.faqs),
     quick_answer: row.quick_answer,
     prompt_to_copy: row.prompt_to_copy,
