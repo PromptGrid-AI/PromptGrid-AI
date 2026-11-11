@@ -18,7 +18,7 @@ interface CategoryPageProps {
   }>;
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://promptgridai.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.promptgridai.com';
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { category } = await params;

@@ -5,14 +5,16 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Clock, ChevronRight } from 'lucide-react';
-import { getPostBySlug, getAdjacentPosts } from '@/lib/supabase';
+import { getPostBySlug, getAdjacentPosts, getRelatedPosts } from '@/lib/supabase';
 import QuickAnswerBox from '@/components/QuickAnswerBox';
 import CopyPromptBox from '@/components/CopyPromptBox';
 import TableOfContents from '@/components/TableOfContents';
 import Sidebar from '@/components/Sidebar';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import PostNavigation from '@/components/PostNavigation';
-import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/JsonLdSchema';
+import FaqSection from '@/components/FaqSection';
+import RelatedPosts from '@/components/RelatedPosts';
+import { ArticleJsonLd, BreadcrumbJsonLd, FaqJsonLd } from '@/components/JsonLdSchema';
 import { extractTocFromMarkdown } from '@/lib/toc';
 
 interface PageProps {
@@ -22,57 +24,55 @@ interface PageProps {
   }>;
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://promptgridai.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.promptgridai.com';
 
 // 🎯 DYNAMIC METADATA PER POST (SEO Powerhouse)
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { category, slug } = await params;
   const post = await getPostBySlug(slug);
-  if (!post) {
+  if (!post || post.category !== category) {
     return { title: 'Article Not Found' };
   }
 
+  const seoTitle = post.meta_title || post.title;
+  const seoDescription = post.meta_description || post.excerpt;
   const canonicalUrl = `${SITE_URL}/${category}/${slug}`;
   const ogImageUrl = post.featured_image.startsWith('http')
     ? post.featured_image
     : `${SITE_URL}${post.featured_image}`;
 
   return {
-    title: post.title,
-    description: post.excerpt,
-    keywords: [
-      post.categoryLabel,
-      'AI Prompts',
-      'Artificial Intelligence',
-      'LLM Tools',
-      ...post.title.split(' ').filter((w) => w.length > 4),
-    ],
+    title: seoTitle,
+    description: seoDescription,
+    keywords: post.tags && post.tags.length > 0 ? post.tags : [post.categoryLabel, 'AI Prompts', 'LLM Tools'],
     authors: [{ name: post.author.name }],
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: post.title,
-      description: post.excerpt,
+      title: seoTitle,
+      description: seoDescription,
       url: canonicalUrl,
       siteName: 'PromptGrid AI',
       type: 'article',
-      publishedTime: post.created_at,
+      publishedTime: post.published_at_iso || post.created_at,
+      modifiedTime: post.updated_at_iso || post.published_at_iso || post.created_at,
       authors: [post.author.name],
       section: post.categoryLabel,
+      tags: post.tags,
       images: [
         {
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: post.title,
+          alt: seoTitle,
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: post.title,
-      description: post.excerpt,
+      title: seoTitle,
+      description: seoDescription,
       images: [ogImageUrl],
       creator: '@PromptGridAI',
     },
@@ -94,16 +94,21 @@ export default async function ArticlePage({ params }: PageProps) {
   const { category, slug } = await params;
   const post = await getPostBySlug(slug);
 
-  if (!post) {
+  if (!post || post.category !== category) {
     notFound();
   }
 
-  const { prev, next } = await getAdjacentPosts(slug, category);
+  const [{ prev, next }, relatedPosts] = await Promise.all([
+    getAdjacentPosts(slug, category),
+    getRelatedPosts(slug, category, post.tags || [], 4, post.cluster_slug),
+  ]);
 
+  const hasFaqs = Boolean(post.faqs && post.faqs.length > 0);
   const tocItems = extractTocFromMarkdown(
     post.content,
     Boolean(post.quick_answer),
-    Boolean(post.prompt_to_copy)
+    Boolean(post.prompt_to_copy),
+    hasFaqs
   );
 
   const canonicalUrl = `${SITE_URL}/${category}/${slug}`;
@@ -115,11 +120,12 @@ export default async function ArticlePage({ params }: PageProps) {
     <>
       {/* 🌟 SEO Structured Data (JSON-LD) */}
       <ArticleJsonLd
-        title={post.title}
-        description={post.excerpt}
+        title={post.meta_title || post.title}
+        description={post.meta_description || post.excerpt}
         url={canonicalUrl}
         imageUrl={ogImageUrl}
-        datePublished={post.created_at}
+        datePublished={post.published_at_iso || post.created_at}
+        dateModified={post.updated_at_iso || post.published_at_iso || post.created_at}
         authorName={post.author.name}
         category={post.categoryLabel}
       />
@@ -130,6 +136,7 @@ export default async function ArticlePage({ params }: PageProps) {
           { name: post.title, url: canonicalUrl },
         ]}
       />
+      {post.faqs && post.faqs.length > 0 && <FaqJsonLd faqs={post.faqs} />}
 
       <article className="py-6 bg-[#FAF9FD] dark:bg-[#070A12] min-h-screen text-gray-900 dark:text-gray-100 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
@@ -225,11 +232,17 @@ export default async function ArticlePage({ params }: PageProps) {
                 </div>
               )}
 
+              {/* FAQ Section (Secondary Intents + FAQPage Schema) */}
+              <FaqSection faqs={post.faqs} />
+
               <div className="pt-6 border-t border-gray-100 dark:border-gray-800">
                 <p className="text-xs text-gray-400 italic">
                   Last verified on {post.created_at} by the PromptGrid AI Editorial Team.
                 </p>
               </div>
+
+              {/* Topical Graph: Related Guides */}
+              <RelatedPosts posts={relatedPosts} />
 
               {/* Previous / Next Article Pagination */}
               <PostNavigation prev={prev} next={next} />

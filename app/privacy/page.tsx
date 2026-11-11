@@ -14,7 +14,7 @@ import {
   UserCheck
 } from 'lucide-react';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://promptgridai.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.promptgridai.com';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',

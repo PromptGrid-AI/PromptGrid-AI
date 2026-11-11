@@ -14,7 +14,8 @@ export function slugifyHeading(text: string): string {
 export function extractTocFromMarkdown(
   content: string,
   hasQuickAnswer = false,
-  hasPrompt = false
+  hasPrompt = false,
+  hasFaqs = false
 ): TocItem[] {
   const items: TocItem[] = [];
 
@@ -37,6 +38,10 @@ export function extractTocFromMarkdown(
 
   if (hasPrompt) {
     items.push({ id: 'interactive-prompt', text: 'Interactive Prompt' });
+  }
+
+  if (hasFaqs) {
+    items.push({ id: 'faq', text: 'Frequently Asked Questions' });
   }
 
   return items;

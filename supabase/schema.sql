@@ -165,3 +165,17 @@ When engineering visual or text prompts, calibrating parameters like stylize wei
   true
 )
 ON CONFLICT (slug) DO NOTHING;
+
+-- 9. Search Intent & Topical Graph Upgrades (Safe / Idempotent)
+ALTER TABLE public.posts
+  ADD COLUMN IF NOT EXISTS cluster_slug text;
+
+CREATE INDEX IF NOT EXISTS idx_posts_cluster_slug ON public.posts(cluster_slug);
+
+ALTER TABLE public.keyword_queue
+  ADD COLUMN IF NOT EXISTS primary_intent text,
+  ADD COLUMN IF NOT EXISTS secondary_intents text[] DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS tertiary_intents text[] DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS cluster_slug text;
+
+CREATE INDEX IF NOT EXISTS idx_keyword_queue_cluster ON public.keyword_queue(cluster_slug);

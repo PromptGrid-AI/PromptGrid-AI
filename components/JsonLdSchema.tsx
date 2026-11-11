@@ -47,7 +47,7 @@ export function ArticleJsonLd({
       name: 'PromptGrid AI',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://promptgridai.com/favicon.ico',
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.promptgridai.com'}/favicon.ico`,
       },
     },
     articleSection: category,

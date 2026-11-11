@@ -1,7 +1,14 @@
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
 export interface Post {
   id: string;
   slug: string;
   title: string;
+  meta_title?: string;
+  meta_description?: string;
   excerpt: string;
   category: 'prompts' | 'alternatives' | 'fixes';
   categoryLabel: string;
@@ -12,7 +19,12 @@ export interface Post {
     avatar: string;
   };
   created_at: string;
+  published_at_iso?: string;
+  updated_at_iso?: string;
   reading_time: string;
+  cluster_slug?: string;
+  tags?: string[];
+  faqs?: FaqItem[];
   quick_answer?: {
     summary: string;
     takeaways: string[];

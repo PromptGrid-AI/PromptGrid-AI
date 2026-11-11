@@ -1,5 +1,6 @@
+import { cache } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Post, MOCK_POSTS } from './mock-data';
+import { Post, FaqItem, MOCK_POSTS } from './mock-data';
 
 export interface DatabasePost {
   id: string;
@@ -20,6 +21,9 @@ export interface DatabasePost {
   author_avatar?: string;
   reading_time_minutes?: number;
   quality_score?: number;
+  cluster_slug?: string;
+  tags?: string[];
+  faqs?: FaqItem[];
   published: boolean;
   created_at: string;
   updated_at?: string;
@@ -194,9 +198,11 @@ export async function getPublishedPosts(): Promise<Post[]> {
   }
 }
 
-// Helper: Get post by slug
-export async function getPostBySlug(slug: string): Promise<Post | null> {
-  if (!supabase) return null;
+// Helper: Get post by slug (memoized per request for generateMetadata + page)
+export const getPostBySlug = cache(async (slug: string): Promise<Post | null> => {
+  if (!supabase) {
+    return MOCK_POSTS.find((p) => p.slug === slug) || null;
+  }
 
   try {
     const { data, error } = await supabase
@@ -210,6 +216,78 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     return mapDbPostToPost(data);
   } catch {
     return null;
+  }
+});
+
+// Helper: Get related posts by cluster_slug, then overlapping tags, then same category (Topical Graph)
+export async function getRelatedPosts(
+  currentSlug: string,
+  category: string,
+  tags: string[] = [],
+  limit = 4,
+  clusterSlug?: string
+): Promise<Post[]> {
+  if (!supabase) {
+    const candidates = MOCK_POSTS.filter((p) => p.slug !== currentSlug);
+    const sameCategory = candidates.filter((p) => p.category === category);
+    const others = candidates.filter((p) => p.category !== category);
+    return [...sameCategory, ...others].slice(0, limit);
+  }
+
+  try {
+    const picked: Post[] = [];
+    const seenSlugs = new Set<string>([currentSlug]);
+
+    const addRows = (rows: DatabasePost[] | null) => {
+      if (!rows) return;
+      for (const row of rows) {
+        if (picked.length >= limit) break;
+        if (!seenSlugs.has(row.slug)) {
+          picked.push(mapDbPostToPost(row));
+          seenSlugs.add(row.slug);
+        }
+      }
+    };
+
+    if (clusterSlug) {
+      const { data: clusterMatches } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('published', true)
+        .eq('cluster_slug', clusterSlug)
+        .neq('slug', currentSlug)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      addRows(clusterMatches);
+    }
+
+    if (picked.length < limit && tags.length > 0) {
+      const { data: tagMatches } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('published', true)
+        .neq('slug', currentSlug)
+        .overlaps('tags', tags)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      addRows(tagMatches);
+    }
+
+    if (picked.length < limit) {
+      const { data: catMatches } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('published', true)
+        .eq('category', category)
+        .neq('slug', currentSlug)
+        .order('created_at', { ascending: false })
+        .limit(limit + picked.length);
+      addRows(catMatches);
+    }
+
+    return picked;
+  } catch {
+    return [];
   }
 }
 
@@ -232,6 +310,19 @@ export async function getPostsByCategory(category: string): Promise<Post[]> {
   }
 }
 
+function normalizeFaqs(raw: unknown): FaqItem[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter(
+    (item): item is FaqItem =>
+      Boolean(item) &&
+      typeof item === 'object' &&
+      typeof (item as FaqItem).question === 'string' &&
+      typeof (item as FaqItem).answer === 'string' &&
+      (item as FaqItem).question.trim().length > 0 &&
+      (item as FaqItem).answer.trim().length > 0
+  );
+}
+
 function mapDbPostToPost(row: DatabasePost): Post {
   const categoryLabels: Record<string, string> = {
     prompts: 'Guides',
@@ -243,6 +334,8 @@ function mapDbPostToPost(row: DatabasePost): Post {
     id: row.id,
     slug: row.slug,
     title: row.title,
+    meta_title: row.meta_title || undefined,
+    meta_description: row.meta_description || undefined,
     excerpt: row.excerpt,
     category: row.category,
     categoryLabel: categoryLabels[row.category] || 'Guides',
@@ -257,7 +350,12 @@ function mapDbPostToPost(row: DatabasePost): Post {
       day: 'numeric',
       year: 'numeric',
     }),
+    published_at_iso: row.created_at,
+    updated_at_iso: row.updated_at || row.created_at,
     reading_time: `${row.reading_time_minutes || 4} min read`,
+    cluster_slug: row.cluster_slug || undefined,
+    tags: Array.isArray(row.tags) ? row.tags.filter((t) => typeof t === 'string' && t.trim().length > 0) : [],
+    faqs: normalizeFaqs(row.faqs),
     quick_answer: row.quick_answer,
     prompt_to_copy: row.prompt_to_copy,
     content: row.content,

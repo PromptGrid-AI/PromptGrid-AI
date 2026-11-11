@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Analytics } from '@vercel/analytics/next';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://promptgridai.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.promptgridai.com';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -20,7 +20,6 @@ export const metadata: Metadata = {
     'Midjourney Prompts',
     'OpenAI 429 Error Fix',
     'AI Tools Directory',
-    'Programmatic SEO',
   ],
   authors: [{ name: 'PromptGrid AI Editorial Team' }],
   creator: 'PromptGrid AI',
